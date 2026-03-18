@@ -3,20 +3,23 @@ binds:
 - port: 3000
   listeners:
   - routes:
-    - policies:
-        cors:
-          allowOrigins:
-          - "*"
-          allowHeaders:
-          - mcp-protocol-version
-          - content-type
-          - cache-control
-          exposeHeaders:
-          - "Mcp-Session-Id"
-      backends:
-      - mcp:
-          targets:
-          - name: everything
-            stdio:
-              cmd: npx
-              args: ["@modelcontextprotocol/server-everything"]
+      - name: gemini
+        matches:
+          - path:
+              pathPrefix: /
+            headers:
+              - name: x-provider
+                value:
+                  exact: gemini
+        backends:
+          - ai:
+              name: gemini
+              provider:
+                gemini:
+                  model: gemini-2.5-flash-lite
+        policies:
+          cors:
+            allowOrigins: ["*"]
+            allowHeaders: ["*"]
+          backendAuth:
+            key: "$GEMINI_API_KEY"
